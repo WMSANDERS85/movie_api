@@ -4,6 +4,7 @@
     <meta charset="UTF-8" />
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" href="../css/styles.css" />
     <title>Movie API Documentation</title>
   </head>
   <body>
@@ -14,5 +15,171 @@
       that will include items such as: favorite movies, favorite actors,
       favorite directors, and a watchlist.
     </p>
+
+    <table>
+      <th>Business Logic</th>
+      <th>URL</th>
+      <th>HTTP Method</th>
+      <th>Query Parameters</th>
+      <th>Request body data format</th>
+      <th>Response body data format</th>
+      <tr>
+        <td>Get a list of Movies</td>
+        <td>/movies</td>
+        <td>GET</td>
+        <td>None</td>
+        <td>None</td>
+        <td>A JSON object holding data about all Movies</td>
+      </tr>
+      <tr>
+        <td>Get data about a movie by title</td>
+        <td>/movies/[title]</td>
+        <td>GET</td>
+        <td>Movie Title (string)</td>
+        <td>None</td>
+        <td>
+          A JSON object holding data about a movie, including title,
+          description, genre, director, imageUrl, and whether or not it is a
+          featured movie. Example: <br />
+          ,
+          <pre>
+ {
+            "title": "Point Break",
+            "description": "An F.B.I. Agent goes undercover to catch a gang of surfers who may be bank robbers.",
+            "genre": {
+                "name": "Action",
+                "description": "Action films are built around a core set of characteristics: spectacular physical action; a narrative emphasis on fights, chases, and explosions; and a combination of state-of-the-art special effects and stunt-work."
+            },
+            "director": {
+                "name": "Kathryn Bigelow",
+                "bio": "Kathryn Ann Bigelow is an American filmmaker. Covering a wide range of genres, her films include Near Dark, Point Break, Strange Days, K-19: The Widowmaker, The Hurt Locker, Zero Dark Thirty, and Detroit.",
+                "birth": "1951",
+                "death": "N/A"
+            },
+            "Released": "1991",
+            "imageUrl": "https://www.imdb.com/title/tt0102685/mediaviewer/rm1454182656/?ref_=tt_ov_i,",
+            "featured": "true"
+        },</pre
+          >
+        </td>
+      </tr>
+      <tr>
+        <td>Get details about a genre by name</td>
+        <td>/movies/genres/[genreName]</td>
+        <td>GET</td>
+        <td>Genre Name (string)</td>
+        <td>None</td>
+        <td>
+          A JSON object holding a description about a genre<br />
+          <pre>
+ {
+            "name": "Drama",
+            "description": "The drama genre features stories with high stakes and many conflicts. They're plot-driven and demand that every character and scene move the story forward."
+        }</pre
+          >
+        </td>
+      </tr>
+      <tr>
+        <td>Get all movie titles by genre</td>
+        <td>/movies/genres/genreName/movies</td>
+        <td>GET</td>
+        <td>Genre Name (string)</td>
+        <td>None</td>
+        <td>
+          A JSON object holding an array of movie objects with related data ,<br />
+          <pre>
+{
+            "title": "Tombstone",
+            "description": "A successful lawman's plans to retire anonymously in Tombstone, Arizona are disrupted by the kind of outlaws he was famous for eliminating.",
+            "genre": {
+                "name": "Drama",
+                "description": "The drama genre features stories with high stakes and many conflicts. They're plot-driven and demand that every character and scene move the story forward."
+            },
+            "director": {
+                "name": "George P. Cosmatos",
+                "bio": "George Pan Cosmatos was a Greek-Italian film director and screenwriter. Following early success in his home country with drama films such as Massacre in Rome.",
+                "birth": "1941",
+                "death": "2005"
+            },
+            "Released": "1993"
+        }</pre
+          >
+        </td>
+      </tr>
+      <tr>
+        <td>Get details about a director by name</td>
+        <td>/movies/directors/[directorName]</td>
+        <td>GET</td>
+        <td>Director Name (string)</td>
+        <td>None</td>
+        <td>
+          A JSON object holding a description about a director, containing a
+          short biography and birth year. <br />
+          <pre>
+{
+            "name": "Kathryn Bigelow",
+            "bio": "Kathryn Ann Bigelow is an American filmmaker. Covering a wide range of genres, her films include Near Dark, Point Break, Strange Days, K-19: The Widowmaker, The Hurt Locker, Zero Dark Thirty, and Detroit.",
+            "birth": "1951",
+            "death": "N/A"
+        }</pre
+          >
+        </td>
+      </tr>
+      <tr>
+        <td>Register New User</td>
+        <td>/users</td>
+        <td>POST</td>
+        <td>None</td>
+        <td>
+          A JSON object holding data about the user to register (Username
+          [alphanumeric], Password and Email required). Example:
+          <pre>{<br>  "Username": "MovieLover123",<br>  "Password": "password",<br>  "Email": "movielover123@gmail.com",<br>  "Birthday": "1985-01-01"<br>}</pre>
+        </td>
+        <td>
+          A JSON object holding data about the user to register (Username
+          [alphanumeric], Password and Email required). Example:
+          <pre>{<br>  "Username": "MovieLover123",<br>  "Password": "password",<br>  "Email": "movielover123@gmail.com",<br>  "Birthday": "1985-01-01"<br>}</pre>
+        </td>
+      </tr>
+      <tr>
+        <td>Update username</td>
+        <td>/users/[username]/[newUsername]</td>
+        <td>PUT</td>
+        <td>
+          Current username (string without spaces),<br />new username (string
+          without spaces)
+        </td>
+        <td>None</td>
+        <td>A text message indicating the new username of the user.</td>
+      </tr>
+      <tr>
+        <td>Add movie to list of users top movies</td>
+        <td>/users/[username]/topMovies/[title]</td>
+        <td>POST</td>
+        <td>Username (string without spaces)<br />movie title (string)</td>
+        <td>None</td>
+        <td>
+          A text message indicating the successfully added movie by title.
+        </td>
+      </tr>
+      <tr>
+        <td>Remove movie from list of users top movies</td>
+        <td>/users/[username]/topMovies/[title]</td>
+        <td>DELETE</td>
+        <td>Username (string without spaces)<br />movie title (string)</td>
+        <td>None</td>
+        <td>A text message indicating successful removal of movie by title.</td>
+      </tr>
+      <tr>
+        <td>Deregister current user</td>
+        <td>/users/[username]</td>
+        <td>DELETE</td>
+        <td>Username (string without spaces)</td>
+        <td>None</td>
+        <td>
+          A text message indicating whether user was successfully deregistered.
+        </td>
+      </tr>
+    </table>
   </body>
 </html>
