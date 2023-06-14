@@ -4,3 +4,15 @@
     --accent-color: #0000; 
     --background: white;
 }
+
+table{
+    border: 1px solid black;
+    
+}
+td{
+    text-align: left;
+    vertical-align: top;
+    border: 1px solid black;
+   
+    
+}
