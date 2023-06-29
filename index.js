@@ -133,6 +133,18 @@ app.get('/movies/directors/:directorName/movies', (req, res) => {
     });
 });
 
+// get a list of all users
+app.get('/users', (req, res) => {
+  Users.find()
+    .then((users) => {
+      res.status(201).json(users);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send(`Error ${err}`);
+    });
+});
+
 // Allow new users to register
 app.post('/users', (req, res) => {
   Users.findOne({Username: req.body.Username}).then((user) => {
@@ -156,38 +168,38 @@ app.post('/users', (req, res) => {
 });
 
 // Allow users to update username and information.
-app.put('/users/username/:newUserName', (req, res) => {
+app.put('/users/:username', (req, res) => {
   const {username} = req.params;
-  const {newUsername, password, email} = req.body;
+  const {newUsername, password, email, birthday} = req.body;
 
-  const userIndex = users.findIndex((user) => user.username === username);
+  // Remember to hash the password before storing!
+  const update = {};
+  if (newUsername) update.Username = newUsername;
+  if (password) update.Password = password;
+  if (email) update.Email = email;
+  if (birthday) update.Birthday = birthday;
 
-  if (userIndex === -1) {
-    res.status(404).send(`User with the username &{username} not found.`);
-    return;
-  }
+  console.log(`Username: ${username}`); // Debugging statement
+  console.log(`Update object: ${JSON.stringify(update)}`); // Debugging statement
 
-  if (newUsername) {
-    const usernameExists = users.some((user) => user.username === newUsername);
-
-    if (usernameExists) {
-      res.status(400).send('Username is already taken.');
-    } else {
-      users[userIndex].username = newUsername;
-    }
-  }
-
-  if (password) {
-    users[userIndex].password = password;
-  }
-  if (email) {
-    users[userIndex].email = email;
-  }
-
-  res.status(200).json({
-    user: users[userIndex],
-    message: 'User information updated successfully',
-  });
+  Users.findOneAndUpdate(
+    {Username: username},
+    {$set: update},
+    {new: true, useFindAndModify: false}
+  )
+    .then((user) => {
+      if (!user) {
+        console.log('No user found to update'); // Debugging statement
+        res.status(404).send(`User with the username ${username} not found.`);
+        return;
+      }
+      console.log(`Updated user: ${JSON.stringify(user)}`); // Debugging statement
+      res.status(200).json(user);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send('An error occurred');
+    });
 });
 
 // Allow users to add a movie to their list of top movies
