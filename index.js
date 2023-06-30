@@ -147,131 +147,151 @@ app.get('/users', (req, res) => {
 
 // Allow new users to register
 app.post('/users', (req, res) => {
-  Users.findOne({Username: req.body.Username}).then((user) => {
-    if (user) {
-      return res.status(400).send(`${req.body.Username} already exists`);
-    }
-    Users.create({
-      Username: req.body.Username,
-      Password: req.body.Password,
-      Birthday: req.body.Birthday,
-    })
-
-      .then((user) => {
-        res.status(201).json(user).send(`${user} has been added sucessfully`);
+  Users.findOne({Username: req.body.Username})
+    .then((user) => {
+      if (user) {
+        return res.status(400).send(`${req.body.Username} already exists`);
+      }
+      Users.create({
+        Username: req.body.Username,
+        Password: req.body.Password,
+        Email: req.body.Email,
+        Birthday: req.body.Birthday,
+        FavoriteMovies: [],
       })
-      .catch((err) => {
-        console.error(err);
-        res.status(500).send(`Error: ${err}`);
-      });
-  });
+        .then((user) => {
+          res.status(201).json({
+            message: `${req.body.Username} has been added successfully`,
+            user: user,
+          });
+        })
+        .catch((err) => {
+          console.error(err);
+          res.status(500).send(`Error: ${err}`);
+        });
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send(`Error: ${err}`);
+    });
 });
 
 // Allow users to update username and information.
 app.put('/users/:username', (req, res) => {
-  const {username} = req.params;
-  const {newUsername, password, email, birthday} = req.body;
+  const currentUsername = req.params.username;
+  function updateUser() {
+    Users.findOneAndUpdate(
+      {Username: currentUsername},
+      {
+        $set: {
+          Username: req.body.Username,
+          Password: req.body.Password,
+          Email: req.body.Email,
+          Birthday: req.body.Birthday,
+        },
+      },
+      // This line is to specify that the following callback function will take the updated object as parameter
+      {new: true}
+    )
+      .then((updatedUser) => {
+        res.status(200).json({
+          message: 'Profile has been updated',
+          user: updatedUser,
+        });
+      })
+      .catch((error) => {
+        console.error(error);
+        res.status(500).send(`Error: ${error}`);
+      });
+  }
 
-  // Remember to hash the password before storing!
-  const update = {};
-  if (newUsername) update.Username = newUsername;
-  if (password) update.Password = password;
-  if (email) update.Email = email;
-  if (birthday) update.Birthday = birthday;
-
-  console.log(`Username: ${username}`); // Debugging statement
-  console.log(`Update object: ${JSON.stringify(update)}`); // Debugging statement
-
-  Users.findOneAndUpdate(
-    {Username: username},
-    {$set: update},
-    {new: true, useFindAndModify: false}
-  )
-    .then((user) => {
-      if (!user) {
-        console.log('No user found to update'); // Debugging statement
-        res.status(404).send(`User with the username ${username} not found.`);
-        return;
+  if (currentUsername !== req.body.Username) {
+    Users.findOne({Username: req.body.Username}).then((user) => {
+      if (user) {
+        return res.status(409).send(`${req.body.Username} already exists.`);
       }
-      console.log(`Updated user: ${JSON.stringify(user)}`); // Debugging statement
-      res.status(200).json(user);
-    })
-    .catch((err) => {
-      console.error(err);
-      res.status(500).send('An error occurred');
+      updateUser();
     });
+  }
+  updateUser();
 });
 
 // Allow users to add a movie to their list of top movies
-app.put('/users/:username/topMovies/:title', (req, res) => {
-  const {username, title} = req.params;
+app.post('/users/:username/favoriteMovies/:movieid', (req, res) => {
+  const {username, movieid: movieId} = req.params;
+  Users.findOne({Username: username, FavoriteMovies: movieId})
+    .then((movieIsPresent) => {
+      if (movieIsPresent) {
+        return res.status(409).send('Movie is already on your list.');
+      }
 
-  const userIndex = users.findIndex((user) => user.username === username);
-  const movieIndex = movies.findIndex(
-    (movie) => movie.title.toLowerCase() === title.toLowerCase()
-  );
-
-  if (userIndex === -1) {
-    res.status(404).send(`User with the username ${username} not found.`);
-    return;
-  }
-
-  if (movieIndex === -1) {
-    res.status(404).send(`Movie with the title ${title} not found.`);
-    return;
-  }
-
-  users[userIndex].topMovies.push(movies[movieIndex]);
-  res.status(200).json({
-    user: users[userIndex],
-    message: 'Movie added to top movies successfully',
-  });
+      Users.findOneAndUpdate(
+        {Username: username},
+        {$addToSet: {FavoriteMovies: movieId}},
+        {new: true}
+      )
+        .then((updatedUser) => {
+          res.status(200).json({
+            message: 'Movie was successfully added',
+            user: updatedUser,
+          });
+        })
+        .catch((error) => {
+          console.error(error);
+          res.status(500).send(`Error: '${error}`);
+        });
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).send(`Error: ${error}`);
+    });
 });
 
 // Allow users to remove a movie from their list of top movies
-app.delete('/users/:username/topMovies/:title', (req, res) => {
-  const {username, title} = req.params;
+app.delete('/users/:username/favoriteMovies/:movieid', (req, res) => {
+  const {username, movieid: movieId} = req.params;
+  Users.findOne({Username: username, FavoriteMovies: movieId})
+    .then((movieIsPresent) => {
+      if (!movieIsPresent) {
+        return res.status(409).send('Movie is not in your list.');
+      }
 
-  const userIndex = users.findIndex((user) => user.username === username);
-
-  if (userIndex === -1) {
-    res.status(404).send(`User with the username ${username} not found.`);
-    return;
-  }
-
-  const movieIndex = users[userIndex].topMovies.findIndex(
-    (movie) => movie.title.toLowerCase() === title.toLowerCase()
-  );
-
-  if (movieIndex === -1) {
-    res
-      .status(404)
-      .send(
-        `Movie with the title ${title} not found in the user's top movies list.`
-      );
-    return;
-  }
-
-  users[userIndex].topMovies.splice(movieIndex, 1);
-  res.status(200).json({
-    user: users[userIndex],
-    message: 'Movie removed from top movies successfully',
-  });
+      Users.findOneAndUpdate(
+        {Username: username},
+        {$pull: {FavoriteMovies: movieId}},
+        {new: true}
+      )
+        .then((updatedUser) => {
+          res.status(200).json({
+            message: 'Movie was successfully removed',
+            user: updatedUser,
+          });
+        })
+        .catch((error) => {
+          console.error(error);
+          res.status(500).send(`Error: ${error}`);
+        });
+    })
+    .catch((error) => {
+      console.error(error);
+      res.status(500).send(`Error: ${error}`);
+    });
 });
 
 // Allow users to unregister
 app.delete('/users/:username', (req, res) => {
   const {username} = req.params;
-
-  const userIndex = users.findIndex((user) => user.username === username);
-
-  if (userIndex === -1) {
-    res.status(404).send(`User with the username ${username} not found.`);
-    return;
-  }
-
-  users.splice(userIndex, 1);
-  res.status(200).send(`User ${username} was successfully unregistered.`);
+  Users.findOneAndRemove({Username: username})
+    .then((user) => {
+      if (!user) {
+        res.status(400).send(`${username} was not found`);
+      }
+      res.status(200).send(`${username} has been deleted`);
+    })
+    .catch((err) => {
+      console.error(err);
+      res.status(500).send(`Error ${err}`);
+    });
 });
 
 app.get('/documentation', (req, res) => {
