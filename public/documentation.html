@@ -142,33 +142,97 @@
         </td>
       </tr>
       <tr>
-        <td>Update username</td>
+        <td>Update user info by username</td>
         <td>/users/[username]/[newUsername]</td>
         <td>PUT</td>
+        <td>Current username (string without spaces)</td>
         <td>
-          Current username (string without spaces),<br />new username (string
-          without spaces)
+          A JSON object holding data about the information to be updated
+          Example:
+          <pre>
+            {
+    
+              "Password": "NewPassword"
+          
+          }
+          </pre>
         </td>
-        <td>None</td>
-        <td>A text message indicating the new username of the user.</td>
+        <td>
+          A JSON object holding an object containing the users data and a
+          message that update was successful
+
+          <pre>
+            {
+              "message": "Profile has been updated",
+              "user": {
+                  "_id": "649e3434a154139b5f2f4434",
+                  "Username": "Jester",
+                  "Password": "NewPassword",
+                  "Email": "Newuser@test.com",
+                  "Birthday": "2002-05-01T07:00:00.000Z",
+                  "FavoriteMovies": [
+                      "6499fe3bb6313aad079b7a19"
+                  ],
+                  "__v": 0
+              }
+          }
+    
+              
+          
+          
+          </pre>
+        </td>
       </tr>
       <tr>
-        <td>Add movie to list of users top movies</td>
-        <td>/users/[username]/topMovies/[title]</td>
+        <td>Add movie to list of users favorite movies</td>
+        <td>/users/[username]/favoriteMovies/[title]</td>
         <td>POST</td>
-        <td>Username (string without spaces)<br />movie title (string)</td>
+        <td>Username (string without spaces)<br />movie_ID (string)</td>
         <td>None</td>
         <td>
-          A text message indicating the successfully added movie by title.
+          A JSON object containing the users data and a message confirming movie
+          was added.
+          <pre>
+            {
+              "message": "Movie was successfully added",
+              "user": {
+                  "_id": "649e33f368cdcf5186f1a0a5",
+                  "Username": "NewUser123",
+                  "Password": "HelloWorld",
+                  "Email": "Newuser@test.com",
+                  "Birthday": "2002-05-01T07:00:00.000Z",
+                  "FavoriteMovies": [
+                      "649a550c4c6ba7987342dfcd"
+                  ],
+                  "__v": 0
+              }
+          </pre>
         </td>
       </tr>
       <tr>
-        <td>Remove movie from list of users top movies</td>
-        <td>/users/[username]/topMovies/[title]</td>
+        <td>Remove movie from list of users favorite movies</td>
+        <td>/users/[username]/favoriteMovies/[title]</td>
         <td>DELETE</td>
-        <td>Username (string without spaces)<br />movie title (string)</td>
+        <td>Username (string without spaces)<br />movie_ID (string)</td>
         <td>None</td>
-        <td>A text message indicating successful removal of movie by title.</td>
+        <td>
+          A JSON object containing the users data and a message confirming movie
+          was removed.
+          <pre>
+            {
+              "message": "Movie was successfully removed",
+              "user": {
+                  "_id": "649e33f368cdcf5186f1a0a5",
+                  "Username": "NewUser123",
+                  "Password": "HelloWorld",
+                  "Email": "Newuser@test.com",
+                  "Birthday": "2002-05-01T07:00:00.000Z",
+                  "FavoriteMovies": [],
+                  "__v": 0
+              }
+          }
+          </pre>
+        </td>
       </tr>
       <tr>
         <td>Deregister current user</td>
@@ -178,6 +242,7 @@
         <td>None</td>
         <td>
           A text message indicating whether user was successfully deregistered.
+          Example: "NewUser123 has been deleted"
         </td>
       </tr>
     </table>
