@@ -14,6 +14,11 @@ app.use(morgan('common'));
 
 app.use(express.static('public'));
 
+const auth = require('./auth')(app);
+const passport = require('passport');
+
+require('./passport');
+
 const Movies = Models.Movie;
 const Users = Models.User;
 
@@ -27,16 +32,20 @@ app.get('/', (req, res) => {
 });
 
 // Gets the list of data about all movies
-app.get('/movies', (req, res) => {
-  Movies.find()
-    .then((movies) => {
-      res.status(201).json(movies);
-    })
-    .catch((err) => {
-      console.error(err);
-      res.status(500).send(`Error ${err}`);
-    });
-});
+app.get(
+  '/movies',
+  passport.authenticate('jwt', {session: false}),
+  (req, res) => {
+    Movies.find()
+      .then((movies) => {
+        res.status(201).json(movies);
+      })
+      .catch((err) => {
+        console.error(err);
+        res.status(500).send(`Error ${err}`);
+      });
+  }
+);
 
 // Gets the data about a single movie by title
 app.get('/movies/:title', (req, res) => {
