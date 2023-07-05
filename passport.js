@@ -14,21 +14,22 @@ passport.use(
       passwordField: 'Password',
     },
     (username, password, callback) => {
-      console.log(`${username} ${password}`);
-      Users.findOne({Username: username}, (error, user) => {
-        if (error) {
+      console.log(`Received username: ${username}`);
+      console.log(`Received password: ${password}`);
+
+      Users.findOne({Username: username})
+        .then((user) => {
+          if (!user) {
+            console.log('Incorrect username');
+            return callback(null, false, {message: 'Incorrect username'});
+          }
+          console.log('finished');
+          return callback(null, user);
+        })
+        .catch((error) => {
           console.log(error);
           return callback(error);
-        }
-
-        if (!user) {
-          console.log('Incorrect username');
-          return callback(null, false, {message: 'Incorrect username'});
-        }
-
-        console.log('finished');
-        return callback(null, user);
-      });
+        });
     }
   )
 );

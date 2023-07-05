@@ -5,18 +5,20 @@ const passport = require('passport');
 
 require('./passport'); // local passport file
 
-const generateJWTToken = (user) => {
+const generateJWTToken = (user) =>
   jwt.sign(user, jwtSecret, {
-    subject: user.Username, // username that is being encoded in the JWT
-    expiresIn: '7d', // token will expire after 7 days
-    algorithm: 'HS256', // algorithm used to 'sign' or encode the values of JWT
+    subject: user.Username,
+    expiresIn: '7d',
+    algorithm: 'HS256',
   });
-};
 
 // POST login
 module.exports = (router) => {
   router.post('/login', (req, res) => {
     passport.authenticate('local', {session: false}, (error, user, info) => {
+      console.log('Error', error); // added
+      console.log('User', user); // addded
+      console.log('Info', info); // added
       if (error || !user) {
         return res.status(400).json({
           message: info ? info.message : 'Something is not right',
