@@ -4,6 +4,7 @@ const morgan = require('morgan');
 const fs = require('fs');
 const path = require('path');
 const bodyParser = require('body-parser');
+const {check, validationResult} = require('express-validator');
 const cors = require('cors');
 const mongoose = require('mongoose');
 const passport = require('passport');
@@ -214,36 +215,57 @@ app.get(
 );
 
 // Allow new users to register
-app.post('/users', (req, res) => {
-  const hashedPassword = Users.hashPassword(req.body.Password);
-  Users.findOne({Username: req.body.Username})
-    .then((user) => {
-      if (user) {
-        return res.status(400).send(`${req.body.Username} already exists`);
-      }
-      Users.create({
-        Username: req.body.Username,
-        Password: hashedPassword,
-        Email: req.body.Email,
-        Birthday: req.body.Birthday,
-        FavoriteMovies: [],
-      })
-        .then((user) => {
-          res.status(201).json({
-            message: `${req.body.Username} has been added successfully`,
-            user: user,
-          });
+app.post(
+  '/users',
+  [
+    check('Username', 'Username must be at least 5 characters').isLength({
+      min: 5,
+    }),
+    check(
+      'Username',
+      'Username contains non alphanumeric characters'
+    ).isAlphanumeric(),
+    check('Password', 'Password is required').not().isEmpty(),
+    check('Email', 'Email does not appear to be valid').isEmail(),
+  ],
+  (req, res) => {
+    // check the validation object for errors
+    const errors = validationResult(req);
+
+    if (!errors.isEmpty()) {
+      return res.status(422).json({errors: errors.array()});
+    }
+
+    const hashedPassword = Users.hashPassword(req.body.Password);
+    Users.findOne({Username: req.body.Username})
+      .then((user) => {
+        if (user) {
+          return res.status(400).send(`${req.body.Username} already exists`);
+        }
+        Users.create({
+          Username: req.body.Username,
+          Password: hashedPassword,
+          Email: req.body.Email,
+          Birthday: req.body.Birthday,
+          FavoriteMovies: [],
         })
-        .catch((err) => {
-          console.error(err);
-          res.status(500).send(`Error: ${err}`);
-        });
-    })
-    .catch((err) => {
-      console.error(err);
-      res.status(500).send(`Error: ${err}`);
-    });
-});
+          .then((user) => {
+            res.status(201).json({
+              message: `${req.body.Username} has been added successfully`,
+              user,
+            });
+          })
+          .catch((err) => {
+            console.error(err);
+            res.status(500).send(`Error: ${err}`);
+          });
+      })
+      .catch((err) => {
+        console.error(err);
+        res.status(500).send(`Error: ${err}`);
+      });
+  }
+);
 
 // Allow users to update username and information.
 app.put(
