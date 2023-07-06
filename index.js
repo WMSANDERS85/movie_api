@@ -1,28 +1,62 @@
+// Modules
 const express = require('express');
 const morgan = require('morgan');
+const fs = require('fs');
+const path = require('path');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 const mongoose = require('mongoose');
-const Models = require('./models');
-
-const app = express();
-
-app.use(bodyParser.json());
-
-app.use(bodyParser.urlencoded({extended: true}));
-
-app.use(morgan('common'));
-
-app.use(express.static('public'));
-
-const auth = require('./auth')(app);
-
 const passport = require('passport');
 
-require('./passport');
+// Local dependencies
+const Models = require('./models');
+const auth = require('./auth');
 
+// Models
 const Movies = Models.Movie;
 const Users = Models.User;
 
+// App setup
+const app = express();
+
+// Logger middleware
+// create a write stream (in append mode)
+const accessLogStream = fs.createWriteStream(path.join(__dirname, 'log.txt'), {
+  flags: 'a',
+});
+// setup the logger to use 'combined' format and write logs to file
+app.use(morgan('combined', {stream: accessLogStream}));
+
+// Parsing middleware
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({extended: true}));
+
+// CORS middleware
+const allowedOrigins = ['http://localhost:8080', 'http://testsite.com'];
+app.use(
+  cors({
+    origin: (origin, callback) => {
+      if (!origin) return callback(null, true);
+      if (allowedOrigins.indexOf(origin) === -1) {
+        // If a specific origin isn’t found on the list of allowed origins
+        const message = `The CORS policy for this application doesn't allow access from origin ${origin}`;
+        return callback(new Error(message), false);
+      }
+      return callback(null, true);
+    },
+  })
+);
+
+// Authentication middleware
+require('./passport');
+
+app.use(passport.initialize());
+auth(app);
+
+// Static files middleware
+app.use(express.static('public'));
+
+// Database connection
 mongoose.connect('mongodb://127.0.0.1:27017/cfDB', {
   useNewUrlParser: true,
   useUnifiedTopology: true,
