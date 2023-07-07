@@ -33,7 +33,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
 // CORS middleware
-const allowedOrigins = ['http://localhost:8080', 'http://testsite.com'];
+const allowedOrigins = '*';
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -234,7 +234,7 @@ app.post(
       'Username contains non alphanumeric characters'
     ).isAlphanumeric(),
     check('Password', 'Password is required').not().isEmpty(),
-    check(['Password', 'Password must be at least 5 characters']).isLength({
+    check('Password', 'Password must be at least 5 characters').isLength({
       min: 5,
     }),
     check('Email', 'Email does not appear to be valid').isEmail(),
@@ -282,6 +282,17 @@ app.post(
 app.put(
   '/users/:username',
   passport.authenticate('jwt', {session: false}),
+  [
+    check('Username')
+      .optional.isAlphanumeric()
+      .withMessage(
+        'Username contains non alphanumeric characters - not allowed'
+      ),
+    check('Password').optional.isLength({min: 5}),
+    check('Email').optional.isEmail.withMessage(
+      'Email does not appear to be valid'
+    ),
+  ],
   (req, res) => {
     const currentUsername = req.params.username;
     function updateUser() {
