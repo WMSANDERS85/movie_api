@@ -33,7 +33,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
 // CORS middleware
-const allowedOrigins = ['http://localhost:8080', 'http://testsite.com'];
+const allowedOrigins = '*';
 app.use(
   cors({
     origin: (origin, callback) => {
@@ -58,11 +58,18 @@ auth(app);
 app.use(express.static('public'));
 
 // Database connection
-mongoose.connect(process.env.MONGODB_URI, {
-  // 'mongodb://127.0.0.1:27017/cfDB' local database connection
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+try {
+  mongoose.connect(
+    process.env.MONGODB_URI,
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    },
+    () => console.log('Connected to the database')
+  );
+} catch (error) {
+  console.log('Database connection failed. Error message: ', error.message);
+}
 
 app.get('/', (req, res) => {
   res.send('Pardon our dust, movie database is under construction');
@@ -227,7 +234,7 @@ app.post(
       'Username contains non alphanumeric characters'
     ).isAlphanumeric(),
     check('Password', 'Password is required').not().isEmpty(),
-    check(['Password', 'Password must be at least 5 characters']).isLength({
+    check('Password', 'Password must be at least 5 characters').isLength({
       min: 5,
     }),
     check('Email', 'Email does not appear to be valid').isEmail(),
@@ -275,6 +282,17 @@ app.post(
 app.put(
   '/users/:username',
   passport.authenticate('jwt', {session: false}),
+  [
+    check('Username')
+      .optional.isAlphanumeric()
+      .withMessage(
+        'Username contains non alphanumeric characters - not allowed'
+      ),
+    check('Password').optional.isLength({min: 5}),
+    check('Email').optional.isEmail.withMessage(
+      'Email does not appear to be valid'
+    ),
+  ],
   (req, res) => {
     const currentUsername = req.params.username;
     function updateUser() {
