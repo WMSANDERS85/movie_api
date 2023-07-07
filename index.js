@@ -58,11 +58,18 @@ auth(app);
 app.use(express.static('public'));
 
 // Database connection
-mongoose.connect(process.env.MONGODB_URI, {
-  // 'mongodb://127.0.0.1:27017/cfDB' local database connection
-  useNewUrlParser: true,
-  useUnifiedTopology: true,
-});
+try {
+  mongoose.connect(
+    process.env.MONGODB_URI,
+    {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    },
+    () => console.log('Connected to the database')
+  );
+} catch (error) {
+  console.log('Database connection failed. Error message: ', error.message);
+}
 
 app.get('/', (req, res) => {
   res.send('Pardon our dust, movie database is under construction');
