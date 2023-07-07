@@ -292,7 +292,8 @@ app.put(
     check('Password').optional().isLength({min: 5}),
     check('Email')
       .optional()
-      .isEmail.withMessage('Email does not appear to be valid'),
+      .isEmail()
+      .withMessage('Email does not appear to be valid'),
   ],
   (req, res) => {
     const currentUsername = req.params.username;
