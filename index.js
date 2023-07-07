@@ -58,7 +58,8 @@ auth(app);
 app.use(express.static('public'));
 
 // Database connection
-mongoose.connect('mongodb://127.0.0.1:27017/cfDB', {
+mongoose.connect(process.env.CONNECTION_URI, {
+  // 'mongodb://127.0.0.1:27017/cfDB' local database connection
   useNewUrlParser: true,
   useUnifiedTopology: true,
 });
