@@ -13,6 +13,7 @@ const generateJWTToken = (user) =>
   });
 
 // POST login
+// !do you need to hash password
 module.exports = (router) => {
   router.post('/login', (req, res) => {
     passport.authenticate('local', {session: false}, (error, user, info) => {
