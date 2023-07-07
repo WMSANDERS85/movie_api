@@ -284,14 +284,15 @@ app.put(
   passport.authenticate('jwt', {session: false}),
   [
     check('Username')
-      .optional.isAlphanumeric()
+      .optional()
+      .isAlphanumeric()
       .withMessage(
         'Username contains non alphanumeric characters - not allowed'
       ),
-    check('Password').optional.isLength({min: 5}),
-    check('Email').optional.isEmail.withMessage(
-      'Email does not appear to be valid'
-    ),
+    check('Password').optional().isLength({min: 5}),
+    check('Email')
+      .optional()
+      .isEmail.withMessage('Email does not appear to be valid'),
   ],
   (req, res) => {
     const currentUsername = req.params.username;
