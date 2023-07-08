@@ -17,8 +17,8 @@ Users will be able to sign up, update their personal information and create a li
 
 ## Links
 
-- [Documentation]()
-- [API]
+- [Documentation](https://myflix-movies-app-3c39c5149294.herokuapp.com/documentation)
+- [API](https://myflix-movies-app-3c39c5149294.herokuapp.com)
 - [Code URL](https://github.com/WMSANDERS85/movie_api)
 
 ## Process
