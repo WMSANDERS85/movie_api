@@ -33,7 +33,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
 // CORS middleware
-const allowedOrigins = '*';
+const allowedOrigins = ['localhost:1234'];
 app.use(
   cors({
     origin: (origin, callback) => {
