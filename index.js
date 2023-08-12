@@ -258,10 +258,10 @@ app.post(
           Birthday: req.body.Birthday,
           FavoriteMovies: [],
         })
-          .then((user) => {
+          .then((updatedUser) => {
             res.status(201).json({
               message: `${req.body.Username} has been added successfully`,
-              user,
+              user: updatedUser,
             });
           })
           .catch((err) => {
@@ -296,15 +296,23 @@ app.put(
   (req, res) => {
     const currentUsername = req.params.username;
     function updateUser() {
+      let updates = {};
+
+      if (req.body.password) {
+        updates.password = req.body.passwords;
+      }
+
+      updates = {
+        ...updates,
+        Birthday: req.body.birthdate,
+        Email: req.body.Email,
+        Username: req.body.Username,
+      };
+
       Users.findOneAndUpdate(
         {Username: currentUsername},
         {
-          $set: {
-            Username: req.body.Username,
-            Password: req.body.Password,
-            Email: req.body.Email,
-            Birthday: req.body.Birthday,
-          },
+          $set: updates,
         },
         // This line is to specify that the following callback function will take the updated object as parameter
         {new: true}
@@ -427,7 +435,7 @@ app.get('/documentation', (req, res) => {
   res.sendFile('public/documentation.html', {root: __dirname});
 });
 
-app.use((err, req, res, next) => {
+app.use((err, req, res) => {
   console.error(err.stack);
   res.status(500).send('Something went wrong!');
 });

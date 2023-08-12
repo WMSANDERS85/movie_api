@@ -5,7 +5,9 @@
   "rules": {
     "no-unused-vars": "warn",
     "no-console": "off",
-    "quotes": ["error", "single", { "allowTemplateLiterals": true }],
-    "func-names": "off"
+    "quotes": ["error", "single", {"allowTemplateLiterals": true}],
+    "func-names": "off",
+    "consistent-return": "off"
   }
 }
+
