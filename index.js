@@ -33,7 +33,10 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
 // CORS middleware
-const allowedOrigins = ['http://localhost:1234'];
+const allowedOrigins = [
+  'http://localhost:1234',
+  'https://moviewatcher-app.netlify.app',
+];
 app.use(
   cors({
     origin: (origin, callback) => {
